@@ -1,0 +1,38 @@
+{
+  "id": "uniswap-v3-lp:calculate-range",
+  "abiRef": "lp-helper",
+  "functionName": "calculateRangeTicks",
+  "builderType": "standard",
+  "name": "Calculate LP Range Ticks",
+  "description": "Compute tick-spacing-aligned lower and upper tick bounds centered on the pool's current price",
+  "detail": "Reads the pool's current tick from slot0, converts the given basis-point half-width to an equivalent tick offset, and returns a symmetric range aligned to the pool's tickSpacing. Use this before minting a new position or rebalancing to get properly aligned ticks. A rangeBps of 500 produces a ±5% range around the current price.",
+  "tags": ["uniswap", "lp", "range", "ticks", "concentrated-liquidity", "rebalance", "tick-calculation"],
+  "triggers": [
+    "calculate tick range",
+    "compute LP range",
+    "get ticks for range",
+    "calculate position range",
+    "compute tick bounds"
+  ],
+  "params": {
+    "pool": {
+      "type": "address",
+      "description": "Uniswap V3 pool address to read current price from"
+    },
+    "rangeBps": {
+      "type": "number",
+      "description": "Half-width of the position range in basis points (e.g. 500 = ±5% from current price, 1000 = ±10%)"
+    }
+  },
+  "examples": [
+    {
+      "input": "Calculate a ±5% tick range for the WETH/USDC 0.3% pool",
+      "params": { "pool": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640", "rangeBps": "500" }
+    },
+    {
+      "input": "Get tick bounds for a ±10% range around current WETH/USDC price",
+      "params": { "pool": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640", "rangeBps": "1000" }
+    }
+  ],
+  "composesBefore": ["uniswap-v3-lp:compute-optimal-amounts", "uniswap-v3:mint-position"]
+}

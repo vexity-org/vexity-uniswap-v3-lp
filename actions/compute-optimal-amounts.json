@@ -1,0 +1,53 @@
+{
+  "id": "uniswap-v3-lp:compute-optimal-amounts",
+  "abiRef": "lp-helper",
+  "functionName": "computeOptimalAmounts",
+  "builderType": "standard",
+  "name": "Compute Optimal LP Token Amounts",
+  "description": "Calculate the maximum-liquidity token amounts for a given tick range given available token balances",
+  "detail": "Given a pool's current sqrtPriceX96 and available token balances, computes the exact token0 and token1 amounts that maximize liquidity for the specified tick range. Returns values that satisfy the Uniswap V3 LiquidityAmounts invariant — amount0Desired and amount1Desired are ready to pass directly to the NonfungiblePositionManager mint or increaseLiquidity functions. Any remaining tokens after minting can be swapped to rebalance the ratio.",
+  "tags": ["uniswap", "lp", "amounts", "liquidity", "concentrated-liquidity", "rebalance", "optimal-amounts"],
+  "triggers": [
+    "compute optimal LP amounts",
+    "calculate token amounts for LP",
+    "how much to deposit in LP",
+    "compute amounts for tick range",
+    "get optimal amounts for liquidity"
+  ],
+  "params": {
+    "pool": {
+      "type": "address",
+      "description": "Uniswap V3 pool address (reads current sqrtPriceX96)"
+    },
+    "tickLower": {
+      "type": "number",
+      "description": "Lower tick of the target range (must be spacing-aligned, use calculate-range action to compute)"
+    },
+    "tickUpper": {
+      "type": "number",
+      "description": "Upper tick of the target range (must be spacing-aligned, use calculate-range action to compute)"
+    },
+    "amount0Available": {
+      "type": "amount",
+      "description": "Maximum token0 available to spend"
+    },
+    "amount1Available": {
+      "type": "amount",
+      "description": "Maximum token1 available to spend"
+    }
+  },
+  "examples": [
+    {
+      "input": "Compute optimal WETH/USDC amounts for ticks -200000 to -190000 with 1 WETH and 2000 USDC available",
+      "params": {
+        "pool": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640",
+        "tickLower": "-200000",
+        "tickUpper": "-190000",
+        "amount0Available": "1000000000000000000",
+        "amount1Available": "2000000000"
+      }
+    }
+  ],
+  "composesAfter": ["uniswap-v3-lp:calculate-range"],
+  "composesBefore": ["uniswap-v3:mint-position"]
+}

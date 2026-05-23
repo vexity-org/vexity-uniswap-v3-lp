@@ -1,0 +1,26 @@
+{
+  "chainId": 42161,
+  "contracts": {
+    "lp-helper": {
+      "address": "0x0000000000000000000000000000000000000000",
+      "name": "UniswapV3LPHelper",
+      "abiRef": "lp-helper",
+      "description": "Weiroll-compatible stateless helper for LP range calculation, rebalance detection, and optimal amount computation. Placeholder — deploy via contracts/src/UniswapV3LPHelper.sol."
+    },
+    "position-manager": {
+      "address": "0xC36442B4A4522E871399cd717ABDd847ab5B0983",
+      "name": "NonfungiblePositionManager",
+      "abiRef": "lp-helper"
+    },
+    "factory": {
+      "address": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "name": "UniswapV3Factory",
+      "abiRef": "lp-helper"
+    },
+    "router": {
+      "address": "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
+      "name": "SwapRouter02",
+      "abiRef": "lp-helper"
+    }
+  }
+}

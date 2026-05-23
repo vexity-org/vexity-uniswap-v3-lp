@@ -1,0 +1,10 @@
+{
+  "id": "uniswap-v3-lp",
+  "name": "Uniswap V3 LP Management",
+  "description": "Community plugin for Uniswap V3 concentrated liquidity position management — calculate ranges, detect rebalance conditions, and orchestrate full LP rebalancing strategies using the UniswapV3LPHelper contract",
+  "version": "1.0.0",
+  "aliases": ["uniswap-lp", "uni-v3-lp", "uniswap-concentrated-liquidity"],
+  "docs": "https://docs.uniswap.org/contracts/v3/overview",
+  "icon": "🦄",
+  "capabilities": ["abis", "actions", "deployments", "strategies"]
+}

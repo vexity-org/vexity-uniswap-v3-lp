@@ -1,0 +1,48 @@
+{
+  "name": "UniswapV3LPHelper",
+  "description": "Weiroll-compatible stateless helper for Uniswap V3 concentrated liquidity management — computes tick ranges, detects rebalance conditions, and calculates optimal token amounts",
+  "functions": {
+    "calculateRangeTicks": {
+      "signature": "calculateRangeTicks(address,uint24)",
+      "inputs": [
+        { "name": "pool", "type": "address", "description": "Uniswap V3 pool address" },
+        { "name": "rangeBps", "type": "uint24", "description": "Half-width in basis points (e.g. 500 = ±5% from current price)" }
+      ],
+      "outputs": [
+        { "name": "tickLower", "type": "int24", "description": "Lower tick boundary, aligned to tickSpacing" },
+        { "name": "tickUpper", "type": "int24", "description": "Upper tick boundary, aligned to tickSpacing" }
+      ],
+      "stateMutability": "view",
+      "description": "Compute tick-spacing-aligned lower and upper tick bounds centered on the pool's current price"
+    },
+    "shouldRebalance": {
+      "signature": "shouldRebalance(address,uint256,uint24)",
+      "inputs": [
+        { "name": "positionManager", "type": "address", "description": "Uniswap V3 NonfungiblePositionManager address" },
+        { "name": "tokenId", "type": "uint256", "description": "NFT token ID of the LP position" },
+        { "name": "bufferBps", "type": "uint24", "description": "Buffer in basis points that widens the no-rebalance zone (0 = rebalance as soon as tick exits range)" }
+      ],
+      "outputs": [
+        { "name": "rebalance", "type": "bool", "description": "True if current tick is outside the buffered range and rebalancing is needed" }
+      ],
+      "stateMutability": "view",
+      "description": "Check whether an LP position has drifted out of its active range and needs rebalancing"
+    },
+    "computeOptimalAmounts": {
+      "signature": "computeOptimalAmounts(address,int24,int24,uint256,uint256)",
+      "inputs": [
+        { "name": "pool", "type": "address", "description": "Uniswap V3 pool address (reads current sqrtPriceX96)" },
+        { "name": "tickLower", "type": "int24", "description": "Lower tick of the target range (must be spacing-aligned)" },
+        { "name": "tickUpper", "type": "int24", "description": "Upper tick of the target range (must be spacing-aligned)" },
+        { "name": "amount0Available", "type": "uint256", "description": "Maximum token0 the caller can spend" },
+        { "name": "amount1Available", "type": "uint256", "description": "Maximum token1 the caller can spend" }
+      ],
+      "outputs": [
+        { "name": "amount0Desired", "type": "uint256", "description": "Token0 amount to use for minting (≤ amount0Available)" },
+        { "name": "amount1Desired", "type": "uint256", "description": "Token1 amount to use for minting (≤ amount1Available)" }
+      ],
+      "stateMutability": "view",
+      "description": "Calculate the maximum-liquidity token amounts for a given tick range given available balances"
+    }
+  }
+}

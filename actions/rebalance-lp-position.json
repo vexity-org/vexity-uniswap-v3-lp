@@ -1,0 +1,109 @@
+{
+  "id": "uniswap-v3-lp:rebalance-lp-position",
+  "abiRef": "lp-helper",
+  "functionName": "computeOptimalAmounts",
+  "builderType": "weiroll",
+  "name": "Rebalance LP Position",
+  "description": "Fully rebalance an out-of-range Uniswap V3 LP position by closing the old position, collecting fees, swapping to the correct ratio, and minting a new position at the current price",
+  "detail": "Orchestrates a complete Uniswap V3 LP rebalance as a Weiroll script. The flow is: (1) remove all liquidity from the existing position, (2) collect freed tokens and fees, (3) compute the optimal new tick range centered on the current price, (4) calculate the optimal token amounts for that range, (5) swap the surplus token to match the required ratio, (6) mint a new position with the balanced amounts. Step outputs are chained via $step.N.output references — the minted tokenId, collected amounts, computed ticks, and swap output all flow automatically between steps.",
+  "tags": ["uniswap", "lp", "rebalance", "concentrated-liquidity", "automation", "composite", "weiroll", "lp-rebalance"],
+  "triggers": [
+    "rebalance LP position",
+    "rebalance uniswap position",
+    "move LP to current price",
+    "reset LP range",
+    "rebalance concentrated liquidity",
+    "update LP position",
+    "auto-rebalance LP"
+  ],
+  "params": {
+    "tokenId": {
+      "type": "number",
+      "description": "NFT token ID of the existing LP position to rebalance"
+    },
+    "rangeBps": {
+      "type": "number",
+      "required": false,
+      "description": "Half-width of the new position range in basis points (e.g. 500 = ±5% from current price)",
+      "default": "500"
+    },
+    "slippageBps": {
+      "type": "number",
+      "required": false,
+      "description": "Maximum slippage tolerance in basis points for the intermediate swap (e.g. 100 = 1%)",
+      "default": "100"
+    }
+  },
+  "hideParams": ["amount0Min", "amount1Min", "deadline", "sqrtPriceLimitX96"],
+  "steps": [
+    {
+      "action": "uniswap-v3:decrease-liquidity",
+      "description": "Remove all liquidity from the existing position",
+      "params": {
+        "tokenId": "$params.tokenId",
+        "liquidity": "MAX"
+      }
+    },
+    {
+      "action": "uniswap-v3:collect",
+      "description": "Collect freed tokens and accumulated fees",
+      "params": {
+        "tokenId": "$params.tokenId",
+        "recipient": "OWNER"
+      }
+    },
+    {
+      "action": "uniswap-v3-lp:calculate-range",
+      "description": "Compute tick-aligned range centered on current price",
+      "params": {
+        "pool": "$context.pool",
+        "rangeBps": "$params.rangeBps"
+      }
+    },
+    {
+      "action": "uniswap-v3-lp:compute-optimal-amounts",
+      "description": "Calculate optimal token amounts for the new range",
+      "params": {
+        "pool": "$context.pool",
+        "tickLower": "$step.2.output.tickLower",
+        "tickUpper": "$step.2.output.tickUpper",
+        "amount0Available": "$step.1.output.amount0",
+        "amount1Available": "$step.1.output.amount1"
+      }
+    },
+    {
+      "action": "uniswap-v3:swap",
+      "description": "Swap surplus token to match the optimal ratio for the new range",
+      "params": {
+        "amountIn": "$step.3.output.swapAmount",
+        "tokenIn": "$context.token0",
+        "tokenOut": "$context.token1",
+        "slippageBps": "$params.slippageBps"
+      }
+    },
+    {
+      "action": "uniswap-v3:mint-position",
+      "description": "Mint the new LP position at the current price range",
+      "params": {
+        "token0": "$context.token0",
+        "token1": "$context.token1",
+        "fee": "$context.fee",
+        "tickLower": "$step.2.output.tickLower",
+        "tickUpper": "$step.2.output.tickUpper",
+        "amount0Desired": "$step.3.output.amount0Desired",
+        "amount1Desired": "$step.3.output.amount1Desired"
+      }
+    }
+  ],
+  "examples": [
+    {
+      "input": "Rebalance my Uniswap LP position #12345 to the current price",
+      "params": { "tokenId": "12345", "rangeBps": "500", "slippageBps": "100" }
+    },
+    {
+      "input": "Move my out-of-range LP position to a ±10% range around current price",
+      "params": { "tokenId": "12345", "rangeBps": "1000", "slippageBps": "50" }
+    }
+  ],
+  "composesAfter": ["uniswap-v3-lp:check-rebalance"]
+}

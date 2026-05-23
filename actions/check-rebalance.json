@@ -1,0 +1,44 @@
+{
+  "id": "uniswap-v3-lp:check-rebalance",
+  "abiRef": "lp-helper",
+  "functionName": "shouldRebalance",
+  "builderType": "standard",
+  "name": "Check If LP Rebalance Needed",
+  "description": "Check whether a Uniswap V3 LP position has drifted out of range and needs rebalancing",
+  "detail": "Reads the position's tick range from the NonfungiblePositionManager, discovers the pool via the factory, and compares the current tick against the position's tick range (expanded by a configurable buffer). Use as a condition action in automation strategies — triggers the rebalance flow only when the position is genuinely out of range. A bufferBps of 0 triggers immediately when the tick exits the position range; larger values add tolerance before rebalancing.",
+  "tags": ["uniswap", "lp", "rebalance", "condition", "out-of-range", "concentrated-liquidity", "automation", "monitoring"],
+  "triggers": [
+    "check if rebalance needed",
+    "is LP position out of range",
+    "should rebalance LP",
+    "check position range",
+    "detect out-of-range position"
+  ],
+  "params": {
+    "positionManager": {
+      "type": "address",
+      "description": "Uniswap V3 NonfungiblePositionManager contract address"
+    },
+    "tokenId": {
+      "type": "number",
+      "description": "NFT token ID of the LP position to check"
+    },
+    "bufferBps": {
+      "type": "number",
+      "required": false,
+      "description": "Tolerance buffer in basis points — widens the no-rebalance zone beyond the position range (0 = rebalance immediately when tick exits range)",
+      "default": "0"
+    }
+  },
+  "examples": [
+    {
+      "input": "Check if my LP position #12345 needs rebalancing",
+      "params": { "positionManager": "0xC36442b4a4522E871399CD717aBDD847Ab5B0983", "tokenId": "12345", "bufferBps": "0" }
+    },
+    {
+      "input": "Check if LP position #12345 is out of range with 1% buffer",
+      "params": { "positionManager": "0xC36442b4a4522E871399CD717aBDD847Ab5B0983", "tokenId": "12345", "bufferBps": "100" }
+    }
+  ],
+  "composesBefore": ["uniswap-v3-lp:rebalance-lp-position"]
+}
