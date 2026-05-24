@@ -1,8 +1,8 @@
 {
   "id": "uniswap-v3-lp:rebalance",
-  "name": "Uniswap V3 LP Auto-Rebalance",
-  "description": "Automatically rebalance a Uniswap V3 concentrated liquidity position when the current price drifts outside the configured range plus buffer zone. Exits the existing position, collects all fees, computes the optimal token split for the new range, rebalances via a swap, then mints a fresh position centered around the current price. Optionally compounds collected fees back into the new position. Automation condition: shouldRebalance(positionManager, tokenId, bufferBps) returns true.",
-  "tags": ["uniswap", "lp", "rebalance", "concentrated-liquidity", "yield"],
+  "name": "Uniswap V3 LP Rebalance",
+  "description": "Create or rebalance a Uniswap V3 concentrated liquidity position with a tick range centered on the current pool price. Exits the existing position, collects all fees, computes the optimal token split for the new range, rebalances via a swap, then mints a fresh position centered around the current price.",
+  "tags": ["uniswap", "lp", "rebalance", "concentrated-liquidity", "yield", "v3", "position"],
   "triggers": [
     "rebalance uniswap lp position",
     "auto rebalance lp",
@@ -14,41 +14,41 @@
     "active lp management",
     "rebalance when out of range",
     "uniswap v3 auto rebalance",
-    "rebalance uniswap position when out of range",
-    "compound fees and rebalance uniswap lp"
+    "re-center my LP",
+    "my uniswap LP is out of range",
+    "adjust LP range",
+    "create a new WETH/USDC LP position"
   ],
   "params": [
     {
-      "name": "pool",
-      "type": "address",
+      "name": "token0",
+      "type": "token",
       "required": true,
-      "description": "Address of the Uniswap V3 pool to provide liquidity in (e.g., the WETH/USDC 0.3% pool)"
+      "description": "First token of the LP pair (e.g. WETH)"
     },
     {
-      "name": "tokenId",
+      "name": "token1",
+      "type": "token",
+      "required": true,
+      "description": "Second token of the LP pair (e.g. USDC)"
+    },
+    {
+      "name": "feeTier",
       "type": "number",
       "required": true,
-      "description": "NFT token ID of the existing Uniswap V3 LP position to rebalance"
+      "description": "Pool fee tier: 100 (0.01%), 500 (0.05%), 3000 (0.3%), or 10000 (1%)"
     },
     {
-      "name": "rangeBps",
+      "name": "rangeWidthBps",
       "type": "number",
       "required": true,
-      "description": "Half-width of the LP price range in basis points (e.g., 500 = ±5% range around current price). Maps to the Uniswap V3 tick range passed to mint."
+      "description": "Total width of the new range in basis points (e.g. 1000 = ±5% around current price)"
     },
     {
-      "name": "bufferBps",
+      "name": "driftBufferBps",
       "type": "number",
       "required": false,
-      "description": "Buffer zone before triggering a rebalance in basis points (e.g., 200 = won't rebalance until price is 2% past the range edge). Prevents excessive rebalancing near range boundaries.",
-      "default": "200"
-    },
-    {
-      "name": "compoundFees",
-      "type": "string",
-      "required": false,
-      "description": "Whether to roll collected trading fees back into the new LP position capital (true/false). When true, fees increase the deposited amounts in mint-position.",
-      "default": "true"
+      "description": "Optional price drift buffer in bps for automation trigger threshold"
     }
   ],
   "steps": [
@@ -80,23 +80,40 @@
   ],
   "examples": [
     {
-      "input": "Auto-rebalance my WETH/USDC Uniswap V3 LP position when it goes out of range, ±5% range with a 2% buffer, and compound fees",
+      "input": "Rebalance my WETH/USDC 0.05% LP to a ±5% range",
       "params": {
-        "pool": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640",
-        "tokenId": "12345",
-        "rangeBps": "500",
-        "bufferBps": "200",
-        "compoundFees": "true"
+        "token0": "WETH",
+        "token1": "USDC",
+        "feeTier": "500",
+        "rangeWidthBps": "1000"
       }
     },
     {
-      "input": "Keep my ETH/USDC Uniswap position rebalanced with a ±10% range and 3% buffer, don't compound fees",
+      "input": "My WBTC/WETH 0.3% LP is out of range, re-center with 20% range",
       "params": {
-        "pool": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640",
-        "tokenId": "67890",
-        "rangeBps": "1000",
-        "bufferBps": "300",
-        "compoundFees": "false"
+        "token0": "WBTC",
+        "token1": "WETH",
+        "feeTier": "3000",
+        "rangeWidthBps": "2000"
+      }
+    },
+    {
+      "input": "Create a new WETH/USDC LP position centered on current price with ±2% range",
+      "params": {
+        "token0": "WETH",
+        "token1": "USDC",
+        "feeTier": "500",
+        "rangeWidthBps": "400"
+      }
+    },
+    {
+      "input": "Auto-rebalance my WETH/USDC Uniswap V3 LP position when it goes out of range, ±5% range with a 2% buffer, and compound fees",
+      "params": {
+        "token0": "WETH",
+        "token1": "USDC",
+        "feeTier": "500",
+        "rangeWidthBps": "1000",
+        "driftBufferBps": "200"
       }
     }
   ],
@@ -105,8 +122,9 @@
     "params": {
       "positionManager": "POSITION_MANAGER",
       "tokenId": "$tokenId",
-      "bufferBps": "$bufferBps"
+      "bufferBps": "$driftBufferBps"
     },
     "description": "Triggers rebalance when the position price moves outside the configured range plus the buffer zone. Uses shouldRebalance(positionManager, tokenId, bufferBps) from the UniswapV3LPHelper contract."
-  }
+  },
+  "chains": [1, 42161, 10, 8453]
 }
