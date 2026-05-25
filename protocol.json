@@ -1,0 +1,19 @@
+{
+  "id": "uniswap-v3-lp",
+  "name": "Uniswap V3 LP",
+  "description": "Uniswap V3 liquidity position management — fee harvesting, position close, rebalancing, auto-compound",
+  "version": "1.0.0",
+  "capabilities": ["abis", "actions", "deployments", "skills", "strategies"],
+  "aliases": ["uni v3 lp", "uniswap lp", "uniswap-concentrated-liquidity"],
+  "docs": "https://github.com/vexity-org/vexity-uniswap-v3-lp",
+  "icon": "🦄",
+  "compilers": {
+    "uniswap-v3-lp:rebalance": "./compilers/rebalance.ts"
+  },
+  "hooks": {
+    "preCompile": "./hooks/pre-compile.ts"
+  },
+  "dependencies": {
+    "uniswap-v3": ">=0.1.0"
+  }
+}

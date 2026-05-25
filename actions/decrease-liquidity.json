@@ -1,0 +1,51 @@
+{
+  "id": "uniswap-v3-lp:decrease-liquidity",
+  "abiRef": "position-manager",
+  "functionName": "decreaseLiquidity",
+  "builderType": "standard",
+  "name": "Decrease LP Liquidity",
+  "description": "Remove liquidity from a Uniswap V3 LP position",
+  "detail": "Removes the specified amount of liquidity from an existing position. Set liquidity to MAX to remove all liquidity. Important: this does NOT transfer tokens — you must call collect-fees afterward to actually receive the freed tokens. The position NFT remains and can be reused.",
+  "tags": ["lp", "liquidity", "remove", "withdraw", "decrease", "uniswap"],
+  "triggers": [
+    "remove liquidity",
+    "decrease liquidity",
+    "withdraw liquidity",
+    "close lp position",
+    "remove lp"
+  ],
+  "params": {
+    "tokenId": {
+      "type": "number",
+      "description": "LP position NFT token ID"
+    },
+    "liquidity": {
+      "type": "amount",
+      "description": "Amount of liquidity to remove (use MAX to remove all)"
+    },
+    "amount0Min": {
+      "type": "amount",
+      "required": false,
+      "description": "Minimum token0 to receive (slippage protection)",
+      "default": "0"
+    },
+    "amount1Min": {
+      "type": "amount",
+      "required": false,
+      "description": "Minimum token1 to receive (slippage protection)",
+      "default": "0"
+    }
+  },
+  "hideParams": ["deadline"],
+  "examples": [
+    {
+      "input": "Remove all liquidity from my Uniswap V3 position #12345",
+      "params": { "tokenId": "12345", "liquidity": "MAX" }
+    },
+    {
+      "input": "Close my LP position 98765",
+      "params": { "tokenId": "98765", "liquidity": "MAX" }
+    }
+  ],
+  "composesBefore": ["uniswap-v3-lp:collect-fees"]
+}

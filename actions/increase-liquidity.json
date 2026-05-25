@@ -1,0 +1,55 @@
+{
+  "id": "uniswap-v3-lp:increase-liquidity",
+  "abiRef": "position-manager",
+  "functionName": "increaseLiquidity",
+  "builderType": "standard",
+  "name": "Increase LP Liquidity",
+  "description": "Add liquidity to an existing Uniswap V3 LP position",
+  "detail": "Adds more liquidity to an existing position without changing its tick range. The token ratio must match the current price relative to the position's range. Useful for compounding collected fees back into the position or adding more capital.",
+  "tags": ["lp", "liquidity", "add", "increase", "deposit", "uniswap", "compound"],
+  "triggers": [
+    "add liquidity",
+    "increase liquidity",
+    "deposit more liquidity",
+    "compound lp fees",
+    "add to lp position"
+  ],
+  "params": {
+    "tokenId": {
+      "type": "number",
+      "description": "LP position NFT token ID"
+    },
+    "amount0Desired": {
+      "type": "amount",
+      "description": "Desired amount of token0 to add"
+    },
+    "amount1Desired": {
+      "type": "amount",
+      "description": "Desired amount of token1 to add"
+    },
+    "amount0Min": {
+      "type": "amount",
+      "required": false,
+      "description": "Minimum token0 to deposit (slippage protection)",
+      "default": "0"
+    },
+    "amount1Min": {
+      "type": "amount",
+      "required": false,
+      "description": "Minimum token1 to deposit (slippage protection)",
+      "default": "0"
+    }
+  },
+  "hideParams": ["deadline"],
+  "examples": [
+    {
+      "input": "Add 1 WETH and 3000 USDC to my LP position #12345",
+      "params": { "tokenId": "12345", "amount0Desired": "1000000000000000000", "amount1Desired": "3000000000" }
+    },
+    {
+      "input": "Compound fees back into my LP position 98765",
+      "params": { "tokenId": "98765", "amount0Desired": "collected0", "amount1Desired": "collected1" }
+    }
+  ],
+  "composesAfter": ["uniswap-v3-lp:collect-fees", "uniswap-v3-lp:compute-optimal-amounts"]
+}

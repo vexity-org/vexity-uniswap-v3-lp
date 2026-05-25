@@ -10,17 +10,20 @@
     "position-manager": {
       "address": "0x1238536071E1c677A632429e3655c799b22cDA52",
       "name": "NonfungiblePositionManager",
-      "abiRef": "lp-helper"
+      "abiRef": "position-manager",
+      "description": "Uniswap V3 LP Position Manager (NFT-based)"
     },
     "factory": {
       "address": "0x0227628f3F023bb0B980b67D528571c95c6DaC1c",
       "name": "UniswapV3Factory",
-      "abiRef": "lp-helper"
+      "abiRef": "lp-helper",
+      "description": "Uniswap V3 Factory for pool discovery"
     },
     "router": {
       "address": "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
       "name": "SwapRouter02",
-      "abiRef": "lp-helper"
+      "abiRef": "lp-helper",
+      "description": "Uniswap V3 SwapRouter for token swaps"
     }
   }
 }

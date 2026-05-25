@@ -1,0 +1,79 @@
+{
+  "name": "NonfungiblePositionManager",
+  "description": "Uniswap V3 LP Position Manager (NFT-based) — manages concentrated liquidity positions as ERC-721 tokens",
+  "functions": {
+    "mint": {
+      "signature": "mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))",
+      "inputs": [
+        { "name": "token0", "type": "address", "description": "Address of token0 in the pair" },
+        { "name": "token1", "type": "address", "description": "Address of token1 in the pair (must be > token0)" },
+        { "name": "fee", "type": "uint24", "description": "Pool fee tier in hundredths of a bip (500 = 0.05%)" },
+        { "name": "tickLower", "type": "int24", "description": "Lower tick boundary of the position range" },
+        { "name": "tickUpper", "type": "int24", "description": "Upper tick boundary of the position range" },
+        { "name": "amount0Desired", "type": "uint256", "description": "Desired amount of token0 to deposit" },
+        { "name": "amount1Desired", "type": "uint256", "description": "Desired amount of token1 to deposit" },
+        { "name": "amount0Min", "type": "uint256", "description": "Minimum token0 to deposit (slippage protection)" },
+        { "name": "amount1Min", "type": "uint256", "description": "Minimum token1 to deposit (slippage protection)" },
+        { "name": "recipient", "type": "address", "description": "Address to receive the position NFT" },
+        { "name": "deadline", "type": "uint256", "description": "Transaction deadline timestamp" }
+      ],
+      "outputs": [
+        { "name": "tokenId", "type": "uint256", "description": "NFT token ID of the new position" },
+        { "name": "liquidity", "type": "uint128", "description": "Amount of liquidity minted" },
+        { "name": "amount0", "type": "uint256", "description": "Actual token0 amount deposited" },
+        { "name": "amount1", "type": "uint256", "description": "Actual token1 amount deposited" }
+      ],
+      "stateMutability": "payable",
+      "description": "Create a new LP position with a specified tick range and token amounts"
+    },
+    "increaseLiquidity": {
+      "signature": "increaseLiquidity((uint256,uint256,uint256,uint256,uint256,uint256))",
+      "inputs": [
+        { "name": "tokenId", "type": "uint256", "description": "Position NFT token ID" },
+        { "name": "amount0Desired", "type": "uint256", "description": "Desired amount of token0 to add" },
+        { "name": "amount1Desired", "type": "uint256", "description": "Desired amount of token1 to add" },
+        { "name": "amount0Min", "type": "uint256", "description": "Minimum token0 to add (slippage protection)" },
+        { "name": "amount1Min", "type": "uint256", "description": "Minimum token1 to add (slippage protection)" },
+        { "name": "deadline", "type": "uint256", "description": "Transaction deadline timestamp" }
+      ],
+      "outputs": [
+        { "name": "liquidity", "type": "uint128", "description": "Amount of liquidity added" },
+        { "name": "amount0", "type": "uint256", "description": "Actual token0 amount deposited" },
+        { "name": "amount1", "type": "uint256", "description": "Actual token1 amount deposited" }
+      ],
+      "stateMutability": "payable",
+      "description": "Add liquidity to an existing LP position without changing the tick range"
+    },
+    "decreaseLiquidity": {
+      "signature": "decreaseLiquidity((uint256,uint128,uint256,uint256,uint256))",
+      "inputs": [
+        { "name": "tokenId", "type": "uint256", "description": "Position NFT token ID" },
+        { "name": "liquidity", "type": "uint128", "description": "Amount of liquidity to remove" },
+        { "name": "amount0Min", "type": "uint256", "description": "Minimum token0 to receive (slippage protection)" },
+        { "name": "amount1Min", "type": "uint256", "description": "Minimum token1 to receive (slippage protection)" },
+        { "name": "deadline", "type": "uint256", "description": "Transaction deadline timestamp" }
+      ],
+      "outputs": [
+        { "name": "amount0", "type": "uint256", "description": "Token0 amount freed from the position" },
+        { "name": "amount1", "type": "uint256", "description": "Token1 amount freed from the position" }
+      ],
+      "stateMutability": "payable",
+      "description": "Remove liquidity from an LP position. Tokens are not transferred — call collect afterward."
+    },
+    "collect": {
+      "signature": "collect((uint256,address,uint128,uint128))",
+      "inputs": [
+        { "name": "tokenId", "type": "uint256", "description": "Position NFT token ID" },
+        { "name": "recipient", "type": "address", "description": "Address to receive collected tokens" },
+        { "name": "amount0Max", "type": "uint128", "description": "Maximum token0 to collect" },
+        { "name": "amount1Max", "type": "uint128", "description": "Maximum token1 to collect" }
+      ],
+      "outputs": [
+        { "name": "amount0", "type": "uint256", "description": "Actual token0 amount collected" },
+        { "name": "amount1", "type": "uint256", "description": "Actual token1 amount collected" }
+      ],
+      "stateMutability": "payable",
+      "description": "Collect accrued trading fees and/or freed liquidity tokens from a position"
+    }
+  }
+}
