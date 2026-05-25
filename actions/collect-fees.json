@@ -1,0 +1,52 @@
+{
+  "id": "uniswap-v3-lp:collect-fees",
+  "abiRef": "position-manager",
+  "functionName": "collect",
+  "builderType": "standard",
+  "name": "Collect LP Fees",
+  "description": "Collect accrued trading fees from a Uniswap V3 LP position",
+  "detail": "Collects accumulated trading fees and/or freed liquidity tokens from a position. Requires the NFT token ID. Set amount0Max and amount1Max to MAX to collect all available. Must be called after decreaseLiquidity to actually receive withdrawn tokens.",
+  "tags": ["lp", "fees", "harvest", "collect", "uniswap", "yield"],
+  "triggers": [
+    "collect fees",
+    "harvest fees",
+    "claim lp fees",
+    "withdraw lp fees",
+    "collect trading fees"
+  ],
+  "params": {
+    "tokenId": {
+      "type": "number",
+      "description": "LP position NFT token ID"
+    },
+    "recipient": {
+      "type": "address",
+      "required": false,
+      "description": "Address to receive collected tokens",
+      "default": "OWNER"
+    },
+    "amount0Max": {
+      "type": "amount",
+      "required": false,
+      "description": "Maximum token0 to collect",
+      "default": "MAX"
+    },
+    "amount1Max": {
+      "type": "amount",
+      "required": false,
+      "description": "Maximum token1 to collect",
+      "default": "MAX"
+    }
+  },
+  "examples": [
+    {
+      "input": "Collect fees from my Uniswap V3 position #12345",
+      "params": { "tokenId": "12345" }
+    },
+    {
+      "input": "Harvest all trading fees from LP position 98765",
+      "params": { "tokenId": "98765" }
+    }
+  ],
+  "composesAfter": ["uniswap-v3-lp:decrease-liquidity"]
+}

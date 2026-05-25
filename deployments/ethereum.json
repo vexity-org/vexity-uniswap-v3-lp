@@ -1,5 +1,5 @@
 {
-  "chainId": 42161,
+  "chainId": 1,
   "contracts": {
     "lp-helper": {
       "address": "0x0000000000000000000000000000000000000000",
@@ -8,7 +8,7 @@
       "description": "Weiroll-compatible stateless helper for LP range calculation, rebalance detection, and optimal amount computation. Placeholder — deploy via contracts/src/UniswapV3LPHelper.sol."
     },
     "position-manager": {
-      "address": "0xC36442B4A4522E871399cd717ABDd847ab5B0983",
+      "address": "0xC36442b4a4522E871399CD717aBDD847Ab5B0983",
       "name": "NonfungiblePositionManager",
       "abiRef": "position-manager",
       "description": "Uniswap V3 LP Position Manager (NFT-based)"

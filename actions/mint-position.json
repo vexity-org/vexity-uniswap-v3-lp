@@ -1,0 +1,81 @@
+{
+  "id": "uniswap-v3-lp:mint-position",
+  "abiRef": "position-manager",
+  "functionName": "mint",
+  "builderType": "standard",
+  "name": "Mint LP Position",
+  "description": "Create a new Uniswap V3 LP position with a specified price range",
+  "detail": "Mints a new concentrated liquidity position as an ERC-721 NFT. Requires the token pair, fee tier, tick range (must be spacing-aligned), and desired token amounts. Use calculate-range to get properly aligned ticks, and compute-optimal-amounts to determine the correct token ratio. Returns the new position's tokenId.",
+  "tags": ["lp", "mint", "create", "position", "uniswap", "concentrated-liquidity", "new"],
+  "triggers": [
+    "mint lp position",
+    "create lp position",
+    "open new lp position",
+    "new liquidity position",
+    "provide liquidity"
+  ],
+  "params": {
+    "token0": {
+      "type": "address",
+      "description": "Address of token0 (must be the lower address of the pair)"
+    },
+    "token1": {
+      "type": "address",
+      "description": "Address of token1 (must be the higher address of the pair)"
+    },
+    "fee": {
+      "type": "number",
+      "description": "Pool fee tier: 100 (0.01%), 500 (0.05%), 3000 (0.3%), or 10000 (1%)"
+    },
+    "tickLower": {
+      "type": "number",
+      "description": "Lower tick boundary (must be aligned to pool tick spacing)"
+    },
+    "tickUpper": {
+      "type": "number",
+      "description": "Upper tick boundary (must be aligned to pool tick spacing)"
+    },
+    "amount0Desired": {
+      "type": "amount",
+      "description": "Desired amount of token0 to deposit"
+    },
+    "amount1Desired": {
+      "type": "amount",
+      "description": "Desired amount of token1 to deposit"
+    },
+    "amount0Min": {
+      "type": "amount",
+      "required": false,
+      "description": "Minimum token0 to deposit (slippage protection)",
+      "default": "0"
+    },
+    "amount1Min": {
+      "type": "amount",
+      "required": false,
+      "description": "Minimum token1 to deposit (slippage protection)",
+      "default": "0"
+    },
+    "recipient": {
+      "type": "address",
+      "required": false,
+      "description": "Address to receive the position NFT",
+      "default": "OWNER"
+    }
+  },
+  "hideParams": ["deadline"],
+  "examples": [
+    {
+      "input": "Create a new WETH/USDC LP position with ±5% range",
+      "params": {
+        "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "fee": "500",
+        "tickLower": "-887220",
+        "tickUpper": "887220",
+        "amount0Desired": "1000000000000000000",
+        "amount1Desired": "3000000000"
+      }
+    }
+  ],
+  "composesAfter": ["uniswap-v3-lp:calculate-range", "uniswap-v3-lp:compute-optimal-amounts"]
+}
