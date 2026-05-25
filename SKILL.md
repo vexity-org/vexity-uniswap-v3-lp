@@ -1,6 +1,6 @@
 ---
 name: uniswap-v3-lp
-description: "Uniswap V3 LP position management — fee harvesting, close, rebalance, auto-compound, out-of-range detection"
+description: "Uniswap V3 LP position management - fee harvesting, close, rebalance, auto-compound, out-of-range detection"
 triggers:
   - uniswap lp
   - liquidity position
