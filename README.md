@@ -8,28 +8,32 @@ Built from the [vexity-org/plugin-template](https://github.com/vexity-org/plugin
 
 - **Rebalance Strategy**: Automatically closes an out-of-range LP position and opens a new one centered on the current tick
 - **Initial Mint**: Creates a new LP position if the user has no existing position for the pair
-- **Parameter Validation**: preCompile hook validates range width, fee tier, and drift buffer before compilation
-- **PluginCompiler**: Fully sandboxed compiler conforming to the `PluginCompiler` interface
+- **Parameter Validation**: Action JSON descriptors include constraint metadata for the agent to validate inputs
+- **SKILL-based Composition**: The agent uses `SKILL.md` procedural knowledge and deterministic tools (`encode-function`, `compile-script`, `build-condition`) to compose Weiroll bytecode
 
 ## Plugin Structure
 
 ```
-├── plugin.json                          # Plugin manifest (compilers, hooks, dependencies)
-├── abis/lp-helper.json                  # UniswapV3LPHelper ABI descriptor
+├── protocol.json                        # Plugin manifest
+├── SKILL.md                             # Procedural knowledge for the agent
+├── abis/
+│   ├── lp-helper.json                   # UniswapV3LPHelper ABI descriptor
+│   └── position-manager.json            # NonfungiblePositionManager ABI
 ├── actions/
 │   ├── calculate-range.json             # Compute aligned tick range
 │   ├── check-rebalance.json             # Condition: is position out of range?
+│   ├── collect-fees.json                # Collect accrued fees from position
 │   ├── compute-optimal-amounts.json     # Optimal token split for a range
+│   ├── decrease-liquidity.json          # Remove liquidity from position
+│   ├── increase-liquidity.json          # Add liquidity to position
+│   ├── mint-position.json               # Create new LP position
 │   └── rebalance-lp-position.json       # Composite Weiroll rebalance flow
 ├── deployments/
 │   ├── arbitrum.json                    # Arbitrum One contract addresses
+│   ├── ethereum.json                    # Ethereum mainnet addresses
 │   └── sepolia.json                     # Sepolia testnet addresses
 ├── strategies/
 │   └── rebalance.json                   # Auto-rebalance strategy template
-├── compilers/
-│   └── rebalance.ts                     # PluginCompiler implementation (sandboxed)
-├── hooks/
-│   └── pre-compile.ts                   # PreCompileHook for param validation
 └── contracts/
     ├── src/UniswapV3LPHelper.sol        # Weiroll-compatible helper contract
     ├── src/interfaces/IUniswapV3Pool.sol
@@ -57,35 +61,18 @@ forge build
 forge test --fork-url https://arb1.arbitrum.io/rpc
 ```
 
-## Compiler Architecture
+## How It Works
 
-The rebalance compiler conforms to the `PluginCompiler` interface and uses only `PluginCompilerContext` APIs:
+The agent uses `SKILL.md` as procedural knowledge injected into its context when the plugin's actions are relevant. The agent's deterministic tools handle the actual Weiroll bytecode compilation — `SKILL.md` describes HOW to compose actions (which functions to call, in what order, with what parameters).
 
-- `ctx.rpc.call()` for on-chain queries (pool state, position lookup)
-- `ctx.abis.encodeFunctionData()` / `decodeFunctionResult()` for ABI encoding
-- `ctx.contracts.getAddress()` for resolving protocol contract addresses
-- `ctx.weiroll.compile()` for converting high-level operations to Weiroll bytecode
-- `ctx.log` for scoped logging
-
-No raw Node.js APIs (`require`, `import`, `fs`, `process`) are used — compilers run in a sandboxed context.
-
-### Compilation Flow
+### Rebalance Flow
 
 1. Resolve token addresses and ensure correct sort order (token0 < token1)
-2. Query pool for current tick via `ctx.rpc.call()`
-3. Calculate new tickLower/tickUpper from rangeWidthBps
+2. Query pool for current tick via `slot0()`
+3. Calculate new tickLower/tickUpper from rangeWidthBps using tick math
 4. Find user's existing position (if any)
 5. Build operations: decreaseLiquidity → collect → approve × 2 → mint
-6. Compile via `ctx.weiroll.compile()`
-
-### Parameter Validation (preCompile Hook)
-
-The preCompile hook validates parameters before compilation:
-
-- `rangeWidthBps`: must be between 1 and 20000 (0.01% to 200%)
-- `feeTier`: must be one of 100, 500, 3000, 10000
-- `driftBufferBps`: if provided, must be positive and less than rangeWidthBps
-- `token0` / `token1`: must be non-empty and different
+6. Compile via `compile-script` tool
 
 ### Strategy Parameters
 
@@ -117,7 +104,7 @@ The preCompile hook validates parameters before compilation:
 export VEXITY_PLUGIN_DIRS=/path/to/plugins
 
 # The plugin system discovers plugins in subdirectories of each dir
-# e.g. /path/to/plugins/uniswap-v3-lp/plugin.json
+# e.g. /path/to/plugins/uniswap-v3-lp/protocol.json
 ```
 
 ### Via vexity.plugins.json
@@ -128,12 +115,6 @@ export VEXITY_PLUGIN_DIRS=/path/to/plugins
 }
 ```
 
-## Dependencies
-
-This plugin depends on the core `uniswap-v3` protocol plugin for:
-- Contract ABIs (`pool`, `position-manager`, `factory`)
-- Deployment addresses (position manager, factory, router per chain)
-
 ## Deployment Status
 
 | Chain | LP Helper | Status |
@@ -142,22 +123,6 @@ This plugin depends on the core `uniswap-v3` protocol plugin for:
 | Sepolia | `0x000...000` | Placeholder — deploy needed |
 
 Uniswap V3 core contracts (Factory, PositionManager, SwapRouter) are included in deployments for reference.
-
-## Creating New Plugins From This Template
-
-1. Copy this repository as a starting point
-2. Update `plugin.json` with your plugin ID, name, and capabilities
-3. Add your strategy descriptors to `strategies/`
-4. Implement your compiler in `compilers/` using only `PluginCompilerContext` APIs
-5. Add parameter validation in `hooks/` via `PreCompileHook`
-6. Test with `VEXITY_PLUGIN_DIRS` pointing at your plugin directory
-
-### Key Constraints
-
-- **No raw Node.js APIs**: Compilers run in a sandboxed context. No `require()`, `import()`, `eval()`, `process`, `fs`, etc.
-- **Trust tiers**: Only `core`, `verified`, and `dev` plugins can load TS compilers/hooks. Community (npm) plugins are limited to JSON declarative hooks.
-- **Static analysis**: Source is scanned for unsafe patterns before loading.
-- **Context-only I/O**: All RPC calls, ABI encoding, and contract resolution go through the context object.
 
 ## License
 

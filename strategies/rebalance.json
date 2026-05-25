@@ -24,58 +24,68 @@
       "name": "token0",
       "type": "token",
       "required": true,
-      "description": "First token of the LP pair (e.g. WETH)"
+      "description": "First token of the LP pair (e.g. WETH). Must have lower address than token1.",
+      "validation": "non-empty, must differ from token1"
     },
     {
       "name": "token1",
       "type": "token",
       "required": true,
-      "description": "Second token of the LP pair (e.g. USDC)"
+      "description": "Second token of the LP pair (e.g. USDC). Must have higher address than token0.",
+      "validation": "non-empty, must differ from token0"
     },
     {
       "name": "feeTier",
       "type": "number",
       "required": true,
-      "description": "Pool fee tier: 100 (0.01%), 500 (0.05%), 3000 (0.3%), or 10000 (1%)"
+      "description": "Pool fee tier: 100 (0.01%, tickSpacing=1), 500 (0.05%, tickSpacing=10), 3000 (0.3%, tickSpacing=60), or 10000 (1%, tickSpacing=200)",
+      "validation": "must be one of: 100, 500, 3000, 10000"
     },
     {
       "name": "rangeWidthBps",
       "type": "number",
       "required": true,
-      "description": "Total width of the new range in basis points (e.g. 1000 = ±5% around current price)"
+      "description": "Total width of the new range in basis points (e.g. 1000 = ±5% around current price). Converted to tick delta via: tickDelta = floor(ln(1 + halfBps/10000) / ln(1.0001) / tickSpacing) * tickSpacing",
+      "validation": "must be between 1 and 20000"
     },
     {
       "name": "driftBufferBps",
       "type": "number",
       "required": false,
-      "description": "Optional price drift buffer in bps for automation trigger threshold"
+      "description": "Optional price drift buffer in bps for automation trigger threshold. Position is rebalanced when price drifts beyond range + buffer.",
+      "validation": "if provided, must be positive and less than rangeWidthBps"
     }
   ],
   "steps": [
     {
-      "actionId": "uniswap-v3:decrease-liquidity",
-      "params": { "tokenId": "$tokenId", "liquidity": "MAX" },
+      "actionId": "uniswap-v3-lp:decrease-liquidity",
+      "params": { "tokenId": "$tokenId", "liquidity": "MAX", "amount0Min": "0", "amount1Min": "0" },
       "label": "Remove all liquidity from current position"
     },
     {
-      "actionId": "uniswap-v3:collect",
-      "params": { "tokenId": "$tokenId", "recipient": "OWNER" },
+      "actionId": "uniswap-v3-lp:collect-fees",
+      "params": { "tokenId": "$tokenId", "recipient": "OWNER", "amount0Max": "MAX", "amount1Max": "MAX" },
       "label": "Collect accrued fees and freed liquidity tokens"
     },
     {
+      "actionId": "uniswap-v3-lp:calculate-range",
+      "params": { "pool": "$pool", "rangeBps": "$rangeWidthBps" },
+      "label": "Calculate new tick-aligned range centered on current pool price"
+    },
+    {
       "actionId": "uniswap-v3-lp:compute-optimal-amounts",
-      "params": { "pool": "$pool", "rangeBps": "$rangeBps", "collectedAmounts": "$step.1.output" },
+      "params": { "pool": "$pool", "tickLower": "$step.2.tickLower", "tickUpper": "$step.2.tickUpper", "balance0": "$step.1.amount0", "balance1": "$step.1.amount1" },
       "label": "Compute optimal token amounts for the new price range"
     },
     {
       "actionId": "uniswap-v3:swap",
-      "params": { "amountIn": "$step.2.output" },
-      "label": "Swap to achieve optimal token ratio for new range"
+      "params": { "tokenIn": "$step.3.surplusToken", "tokenOut": "$step.3.deficitToken", "amountIn": "$step.3.swapAmount", "fee": "$feeTier" },
+      "label": "Swap surplus token to achieve optimal ratio for new range"
     },
     {
-      "actionId": "uniswap-v3:mint-position",
-      "params": { "pool": "$pool", "amount0Desired": "$step.2.output", "amount1Desired": "$step.2.output" },
-      "label": "Mint new LP position centered around current price"
+      "actionId": "uniswap-v3-lp:mint-position",
+      "params": { "token0": "$token0", "token1": "$token1", "fee": "$feeTier", "tickLower": "$step.2.tickLower", "tickUpper": "$step.2.tickUpper", "amount0Desired": "BALANCE", "amount1Desired": "BALANCE", "recipient": "OWNER" },
+      "label": "Mint new LP position at the computed tick range"
     }
   ],
   "examples": [

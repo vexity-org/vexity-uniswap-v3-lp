@@ -108,12 +108,80 @@ collect-fees(tokenId, recipient=OWNER, amount0Max=MAX, amount1Max=MAX)
 | Ethereum | 1 | 0xC36442b4a4522E871399CD717aBDD847Ab5B0983 |
 | Arbitrum | 42161 | 0xC36442B4A4522E871399cd717ABDd847ab5B0983 |
 
+### Tick Math & Range Calculation
+
+The agent's deterministic tools handle bytecode compilation, but the agent needs this knowledge to correctly parameterize LP operations.
+
+#### Fee Tier → Tick Spacing Mapping
+
+| Fee Tier | Fee (%) | Tick Spacing |
+|----------|---------|--------------|
+| 100      | 0.01%   | 1            |
+| 500      | 0.05%   | 10           |
+| 3000     | 0.30%   | 60           |
+| 10000    | 1.00%   | 200          |
+
+#### Converting Range Width (BPS) to Tick Delta
+
+`rangeWidthBps` is the **total** range width. To compute tick bounds:
+
+1. Compute half-range: `halfBps = rangeWidthBps / 2`
+2. Convert to tick delta: `tickDelta = ln(1 + halfBps / 10000) / ln(1.0001)`
+3. Round down to nearest tick spacing: `aligned = max(tickSpacing, floor(tickDelta / tickSpacing) * tickSpacing)`
+4. Compute bounds: `tickLower = alignedCenter - aligned`, `tickUpper = alignedCenter + aligned`
+
+Where `alignedCenter = round(currentTick / tickSpacing) * tickSpacing`.
+
+**Example**: For rangeWidthBps=1000 (±5%), fee tier 3000 (tickSpacing=60):
+- halfBps = 500
+- tickDelta = ln(1.05) / ln(1.0001) ≈ 487.9
+- aligned = floor(487.9 / 60) * 60 = 480
+- Range: [currentTick - 480, currentTick + 480]
+
+#### Querying Current Tick (slot0)
+
+To get the current pool price/tick:
+1. Resolve pool address via Factory: `factory.getPool(token0, token1, fee)` — returns zero address if pool doesn't exist
+2. Query pool's `slot0()` — returns `(sqrtPriceX96, tick, observationIndex, observationCardinality, observationCardinalityNext, feeProtocol, unlocked)`
+3. The `tick` (index 1) is the current tick used for range centering
+
+**sqrtPriceX96**: The pool price encoded as `sqrt(price) * 2^96`. To get the human-readable price: `price = (sqrtPriceX96 / 2^96)^2`. This is the ratio of token1/token0 in their raw decimal units.
+
+#### Position Resolution
+
+To find a user's existing position for a token pair + fee:
+1. Query `positionManager.balanceOf(owner)` to get NFT count
+2. Iterate with `tokenOfOwnerByIndex(owner, i)` to get each tokenId
+3. Query `positions(tokenId)` → returns `(nonce, operator, token0, token1, fee, tickLower, tickUpper, liquidity, ...)`
+4. Match on token0 + token1 + fee; prefer the position with most liquidity
+
+### Parameter Validation Rules
+
+When composing rebalance strategies, validate these constraints:
+
+- **token0 / token1**: Must be non-empty, must be different tokens, token0 address must be less than token1 (standard sort order)
+- **feeTier**: Must be exactly one of: 100, 500, 3000, 10000
+- **rangeWidthBps**: Must be between 1 and 20000 (0.01% to 200% total range)
+- **driftBufferBps** (optional): Must be positive and strictly less than rangeWidthBps
+
 ### Strategy: Auto-Rebalance
 
 The `uniswap-v3-lp:rebalance` strategy automates position management. It monitors positions for price drift and triggers rebalancing when the position goes out of range. Parameters:
 - **token0 / token1**: The LP pair tokens
-- **feeTier**: Pool fee tier
-- **rangeWidthBps**: Total range width for the new position
+- **feeTier**: Pool fee tier (100, 500, 3000, or 10000)
+- **rangeWidthBps**: Total range width for the new position (1–20000)
 - **driftBufferBps** (optional): How far price must drift beyond range before triggering rebalance
 
-The strategy uses a PluginCompiler (`compilers/rebalance.ts`) that dynamically queries on-chain state and builds Weiroll bytecode for atomic execution.
+#### Rebalance Composition Flow
+
+The agent composes a rebalance using deterministic tools (`encode-function`, `compile-script`, `build-condition`) following this sequence:
+
+1. **Query on-chain state**: Use `encode-function` to call `slot0()` on the pool, extract current tick
+2. **Calculate new tick bounds**: Apply the tick math above to derive tickLower/tickUpper from rangeWidthBps
+3. **Find existing position**: Enumerate user's position NFTs, match on pair + fee
+4. **Build operations** (if existing position):
+   - `decreaseLiquidity(tokenId, liquidity=MAX, amount0Min=0, amount1Min=0, deadline)`
+   - `collect(tokenId, recipient=OWNER, amount0Max=MAX_UINT128, amount1Max=MAX_UINT128)`
+5. **Approve tokens**: Approve token0 and token1 for the NonfungiblePositionManager
+6. **Mint new position**: `mint(token0, token1, fee, tickLower, tickUpper, amount0Desired=BALANCE, amount1Desired=BALANCE, amount0Min=0, amount1Min=0, recipient=OWNER, deadline)`
+7. **Compile**: Use `compile-script` to produce Weiroll bytecode from the operation sequence
