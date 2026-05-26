@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:collect-fees",
   "abiRef": "position-manager",
   "functionName": "collect",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Collect LP Fees",
   "description": "Collect accrued trading fees from a Uniswap V3 LP position",
   "detail": "Collects accumulated trading fees and/or freed liquidity tokens from a position. Requires the NFT token ID. Set amount0Max and amount1Max to MAX to collect all available. Must be called after decreaseLiquidity to actually receive withdrawn tokens.",

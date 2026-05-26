@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:check-rebalance",
   "abiRef": "lp-helper",
   "functionName": "shouldRebalance",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Check If LP Rebalance Needed",
   "description": "Check whether a Uniswap V3 LP position has drifted out of range and needs rebalancing",
   "detail": "Reads the position's tick range from the NonfungiblePositionManager, discovers the pool via the factory, and compares the current tick against the position's tick range (expanded by a configurable buffer). Use as a condition action in automation strategies — triggers the rebalance flow only when the position is genuinely out of range. A bufferBps of 0 triggers immediately when the tick exits the position range; larger values add tolerance before rebalancing.",

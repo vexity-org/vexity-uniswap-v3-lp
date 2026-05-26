@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:calculate-range",
   "abiRef": "lp-helper",
   "functionName": "calculateRangeTicks",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Calculate LP Range Ticks",
   "description": "Compute tick-spacing-aligned lower and upper tick bounds centered on the pool's current price",
   "detail": "Reads the pool's current tick from slot0, converts the given basis-point half-width to an equivalent tick offset, and returns a symmetric range aligned to the pool's tickSpacing. Use this before minting a new position or rebalancing to get properly aligned ticks. A rangeBps of 500 produces a ±5% range around the current price.",

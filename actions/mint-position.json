@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:mint-position",
   "abiRef": "position-manager",
   "functionName": "mint",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Mint LP Position",
   "description": "Create a new Uniswap V3 LP position with a specified price range",
   "detail": "Mints a new concentrated liquidity position as an ERC-721 NFT. Requires the token pair, fee tier, tick range (must be spacing-aligned), and desired token amounts. Use calculate-range to get properly aligned ticks, and compute-optimal-amounts to determine the correct token ratio. Returns the new position's tokenId.",

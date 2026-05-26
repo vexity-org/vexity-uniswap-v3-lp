@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:increase-liquidity",
   "abiRef": "position-manager",
   "functionName": "increaseLiquidity",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Increase LP Liquidity",
   "description": "Add liquidity to an existing Uniswap V3 LP position",
   "detail": "Adds more liquidity to an existing position without changing its tick range. The token ratio must match the current price relative to the position's range. Useful for compounding collected fees back into the position or adding more capital.",
