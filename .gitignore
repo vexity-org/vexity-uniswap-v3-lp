@@ -4,7 +4,6 @@ node_modules/
 # Foundry
 contracts/out/
 contracts/cache/
-contracts/lib/
 
 # Environment
 .env

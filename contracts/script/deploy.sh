@@ -32,6 +32,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONTRACTS_DIR="$(dirname "$SCRIPT_DIR")"
 DEPLOYMENTS_DIR="$(dirname "$CONTRACTS_DIR")/deployments"
 
+# Load .env from repo root if present
+REPO_ROOT="$(dirname "$CONTRACTS_DIR")"
+if [ -f "$REPO_ROOT/.env" ]; then
+  # shellcheck source=/dev/null
+  set -a; source "$REPO_ROOT/.env"; set +a
+fi
+
 CHAIN="arbitrum"
 DEPLOYMENT_FILE="arbitrum.json"
 RPC_URL="${ARBITRUM_RPC_URL:?Error: ARBITRUM_RPC_URL is not set}"
