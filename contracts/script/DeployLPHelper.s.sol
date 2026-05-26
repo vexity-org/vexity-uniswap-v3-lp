@@ -6,21 +6,22 @@ import {UniswapV3LPHelper} from "../src/UniswapV3LPHelper.sol";
 
 /// @title DeployLPHelper
 /// @notice Foundry script to deploy UniswapV3LPHelper on any supported chain.
-/// @dev Usage:
-///   forge script script/DeployLPHelper.s.sol:DeployLPHelper \
-///     --rpc-url <RPC_URL> --broadcast --verify \
-///     -vvvv
+/// @dev Signing is handled externally via forge flags. Supported methods:
 ///
-///   Required env vars:
-///     PRIVATE_KEY  - deployer private key (or use --ledger / --trezor)
+///   Foundry keystore (recommended):
+///     forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+///       --rpc-url <RPC_URL> --account <wallet-name> --broadcast -vvvv
 ///
-///   Optional env vars:
-///     ETHERSCAN_API_KEY - for contract verification
+///   Raw private key:
+///     forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+///       --rpc-url <RPC_URL> --private-key $PRIVATE_KEY --broadcast -vvvv
+///
+///   Hardware wallet:
+///     forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+///       --rpc-url <RPC_URL> --ledger --broadcast -vvvv
 contract DeployLPHelper is Script {
     function run() external {
-        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
-
-        vm.startBroadcast(deployerKey);
+        vm.startBroadcast();
 
         UniswapV3LPHelper helper = new UniswapV3LPHelper();
 
@@ -28,6 +29,5 @@ contract DeployLPHelper is Script {
 
         console.log("UniswapV3LPHelper deployed at:", address(helper));
         console.log("Chain ID:", block.chainid);
-        console.log("Deployer:", vm.addr(deployerKey));
     }
 }

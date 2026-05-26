@@ -73,38 +73,53 @@ The `UniswapV3LPHelper` is a stateless contract with no constructor arguments. D
 ```bash
 cd contracts
 
-# Dry-run (simulation only, no on-chain transaction)
-./script/deploy.sh sepolia
+# Using a Foundry keystore wallet (recommended)
+./script/deploy.sh sepolia --account deployer              # dry-run
+./script/deploy.sh sepolia --account deployer --broadcast   # deploy
+./script/deploy.sh arbitrum --account hot --broadcast --verify
 
-# Deploy for real
-./script/deploy.sh sepolia --broadcast
+# Using a raw private key (via env var)
+PRIVATE_KEY=0x... ./script/deploy.sh sepolia --broadcast
 
-# Deploy and verify on Etherscan
-./script/deploy.sh arbitrum --broadcast --verify
+# Using a hardware wallet
+./script/deploy.sh arbitrum --ledger --broadcast --verify
 ```
 
 Supported chains: `arbitrum`, `ethereum`, `sepolia`.
+
+To import a wallet into Foundry's keystore:
+```bash
+cast wallet import deployer --interactive
+cast wallet list   # verify it was imported
+```
 
 #### Using forge directly
 
 ```bash
 cd contracts
 
+# With keystore wallet
 forge script script/DeployLPHelper.s.sol:DeployLPHelper \
   --rpc-url $SEPOLIA_RPC_URL \
-  --broadcast --verify \
-  -vvvv
+  --account deployer \
+  --broadcast --verify -vvvv
+
+# With raw private key
+forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+  --rpc-url $SEPOLIA_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast --verify -vvvv
 ```
 
-#### Required environment variables
+#### Environment variables
 
-| Variable | Description |
-|----------|-------------|
-| `PRIVATE_KEY` | Deployer wallet private key |
-| `ARBITRUM_RPC_URL` | Arbitrum One RPC endpoint |
-| `ETHEREUM_RPC_URL` | Ethereum mainnet RPC endpoint |
-| `SEPOLIA_RPC_URL` | Sepolia testnet RPC endpoint |
-| `ETHERSCAN_API_KEY` | For contract verification (optional) |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ARBITRUM_RPC_URL` | For Arbitrum deploys | Arbitrum One RPC endpoint |
+| `ETHEREUM_RPC_URL` | For mainnet deploys | Ethereum mainnet RPC endpoint |
+| `SEPOLIA_RPC_URL` | For testnet deploys | Sepolia testnet RPC endpoint |
+| `PRIVATE_KEY` | Only if no `--account`/`--ledger` | Deployer private key (fallback) |
+| `ETHERSCAN_API_KEY` | For `--verify` | Etherscan API key for contract verification |
 
 After deploying, update the corresponding `deployments/<chain>.json` file with the deployed `lp-helper` address.
 
