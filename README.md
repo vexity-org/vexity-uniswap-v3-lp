@@ -35,6 +35,9 @@ Built from the [vexity-org/plugin-template](https://github.com/vexity-org/plugin
 ├── strategies/
 │   └── rebalance.json                   # Auto-rebalance strategy template
 └── contracts/
+    ├── script/
+    │   ├── DeployLPHelper.s.sol         # Foundry deployment script
+    │   └── deploy.sh                    # Shell helper for multi-chain deploys
     ├── src/UniswapV3LPHelper.sol        # Weiroll-compatible helper contract
     ├── src/interfaces/IUniswapV3Pool.sol
     └── test/UniswapV3LPHelper.t.sol     # 16 fork tests against live Arbitrum pools
@@ -60,6 +63,65 @@ forge install
 forge build
 forge test --fork-url https://arb1.arbitrum.io/rpc
 ```
+
+### Deploying
+
+The `UniswapV3LPHelper` is a stateless contract with no constructor arguments. Deploy once per chain.
+
+#### Using the shell helper
+
+```bash
+cd contracts
+
+# Using a Foundry keystore wallet (recommended)
+./script/deploy.sh sepolia --account deployer              # dry-run
+./script/deploy.sh sepolia --account deployer --broadcast   # deploy
+./script/deploy.sh arbitrum --account hot --broadcast --verify
+
+# Using a raw private key (via env var)
+PRIVATE_KEY=0x... ./script/deploy.sh sepolia --broadcast
+
+# Using a hardware wallet
+./script/deploy.sh arbitrum --ledger --broadcast --verify
+```
+
+Supported chains: `arbitrum`, `ethereum`, `sepolia`.
+
+To import a wallet into Foundry's keystore:
+```bash
+cast wallet import deployer --interactive
+cast wallet list   # verify it was imported
+```
+
+#### Using forge directly
+
+```bash
+cd contracts
+
+# With keystore wallet
+forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+  --rpc-url $SEPOLIA_RPC_URL \
+  --account deployer \
+  --broadcast --verify -vvvv
+
+# With raw private key
+forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+  --rpc-url $SEPOLIA_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast --verify -vvvv
+```
+
+#### Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ARBITRUM_RPC_URL` | For Arbitrum deploys | Arbitrum One RPC endpoint |
+| `ETHEREUM_RPC_URL` | For mainnet deploys | Ethereum mainnet RPC endpoint |
+| `SEPOLIA_RPC_URL` | For testnet deploys | Sepolia testnet RPC endpoint |
+| `PRIVATE_KEY` | Only if no `--account`/`--ledger` | Deployer private key (fallback) |
+| `ETHERSCAN_API_KEY` | For `--verify` | Etherscan API key for contract verification |
+
+After deploying, update the corresponding `deployments/<chain>.json` file with the deployed `lp-helper` address.
 
 ## How It Works
 
@@ -119,8 +181,9 @@ export VEXITY_PLUGIN_DIRS=/path/to/plugins
 
 | Chain | LP Helper | Status |
 |-------|-----------|--------|
-| Arbitrum | `0x000...000` | Placeholder — deploy needed |
-| Sepolia | `0x000...000` | Placeholder — deploy needed |
+| Arbitrum | `0x000...000` | Placeholder — deploy via `./script/deploy.sh arbitrum --broadcast` |
+| Ethereum | `0x000...000` | Placeholder — deploy via `./script/deploy.sh ethereum --broadcast` |
+| Sepolia | `0x000...000` | Placeholder — deploy via `./script/deploy.sh sepolia --broadcast` |
 
 Uniswap V3 core contracts (Factory, PositionManager, SwapRouter) are included in deployments for reference.
 

@@ -2,7 +2,7 @@
   "chainId": 42161,
   "contracts": {
     "lp-helper": {
-      "address": "0x0000000000000000000000000000000000000000",
+      "address": "0x8b320a9bb7e900cc2af9fd251482d137d402b6b6",
       "name": "UniswapV3LPHelper",
       "abiRef": "lp-helper",
       "description": "Weiroll-compatible stateless helper for LP range calculation, rebalance detection, and optimal amount computation. Placeholder — deploy via contracts/src/UniswapV3LPHelper.sol."
