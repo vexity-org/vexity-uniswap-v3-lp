@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ── Deploy UniswapV3LPHelper ─────────────────────────────────────────
+# ── Deploy UniswapV3LPHelper to Arbitrum ────────────────────────────
 #
 # Usage:
-#   ./script/deploy.sh <chain> [--account <name>] [--broadcast] [--verify]
-#
-# Chains: arbitrum, ethereum, sepolia
+#   ./script/deploy.sh [--account <name>] [--broadcast] [--verify]
 #
 # Signing methods (pick one):
 #   --account <name>     Use a Foundry keystore wallet (cast wallet import)
@@ -17,13 +15,13 @@ set -euo pipefail
 # If no signing method is specified, PRIVATE_KEY env var is used as fallback.
 #
 # Examples:
-#   ./script/deploy.sh sepolia --account deployer              # dry-run with keystore
-#   ./script/deploy.sh sepolia --account deployer --broadcast   # deploy with keystore
-#   ./script/deploy.sh arbitrum --account hot --broadcast --verify
-#   ./script/deploy.sh sepolia --broadcast                      # uses PRIVATE_KEY env
+#   ./script/deploy.sh --account deployer              # dry-run with keystore
+#   ./script/deploy.sh --account deployer --broadcast   # deploy with keystore
+#   ./script/deploy.sh --account hot --broadcast --verify
+#   ./script/deploy.sh --broadcast                      # uses PRIVATE_KEY env
 #
 # Required env vars:
-#   <CHAIN>_RPC_URL     - RPC endpoint (e.g. ARBITRUM_RPC_URL, SEPOLIA_RPC_URL)
+#   ARBITRUM_RPC_URL    - RPC endpoint for Arbitrum
 #
 # Optional env vars:
 #   PRIVATE_KEY         - deployer private key (fallback if no --account/--ledger)
@@ -34,21 +32,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONTRACTS_DIR="$(dirname "$SCRIPT_DIR")"
 DEPLOYMENTS_DIR="$(dirname "$CONTRACTS_DIR")/deployments"
 
-CHAIN="${1:?Usage: ./script/deploy.sh <chain> [--account <name>] [--broadcast] [--verify]}"
-shift
-
-# Map chain name to RPC env var
-case "$CHAIN" in
-  arbitrum)  RPC_VAR="ARBITRUM_RPC_URL"; DEPLOYMENT_FILE="arbitrum.json" ;;
-  ethereum)  RPC_VAR="ETHEREUM_RPC_URL"; DEPLOYMENT_FILE="ethereum.json" ;;
-  sepolia)   RPC_VAR="SEPOLIA_RPC_URL";  DEPLOYMENT_FILE="sepolia.json"  ;;
-  *)
-    echo "Error: Unknown chain '$CHAIN'. Supported: arbitrum, ethereum, sepolia"
-    exit 1
-    ;;
-esac
-
-RPC_URL="${!RPC_VAR:?Error: $RPC_VAR is not set}"
+CHAIN="arbitrum"
+DEPLOYMENT_FILE="arbitrum.json"
+RPC_URL="${ARBITRUM_RPC_URL:?Error: ARBITRUM_RPC_URL is not set}"
 
 # Check if a signing method is provided in the flags
 HAS_SIGNER=false
@@ -74,7 +60,7 @@ if [ "$HAS_SIGNER" = false ]; then
 fi
 
 echo "==> Deploying UniswapV3LPHelper to $CHAIN"
-echo "    RPC: $RPC_VAR"
+echo "    RPC: ARBITRUM_RPC_URL"
 echo "    Flags: $*"
 
 # Run forge script from the contracts directory
