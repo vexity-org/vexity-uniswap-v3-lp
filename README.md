@@ -35,6 +35,9 @@ Built from the [vexity-org/plugin-template](https://github.com/vexity-org/plugin
 ├── strategies/
 │   └── rebalance.json                   # Auto-rebalance strategy template
 └── contracts/
+    ├── script/
+    │   ├── DeployLPHelper.s.sol         # Foundry deployment script
+    │   └── deploy.sh                    # Shell helper for multi-chain deploys
     ├── src/UniswapV3LPHelper.sol        # Weiroll-compatible helper contract
     ├── src/interfaces/IUniswapV3Pool.sol
     └── test/UniswapV3LPHelper.t.sol     # 16 fork tests against live Arbitrum pools
@@ -60,6 +63,50 @@ forge install
 forge build
 forge test --fork-url https://arb1.arbitrum.io/rpc
 ```
+
+### Deploying
+
+The `UniswapV3LPHelper` is a stateless contract with no constructor arguments. Deploy once per chain.
+
+#### Using the shell helper
+
+```bash
+cd contracts
+
+# Dry-run (simulation only, no on-chain transaction)
+./script/deploy.sh sepolia
+
+# Deploy for real
+./script/deploy.sh sepolia --broadcast
+
+# Deploy and verify on Etherscan
+./script/deploy.sh arbitrum --broadcast --verify
+```
+
+Supported chains: `arbitrum`, `ethereum`, `sepolia`.
+
+#### Using forge directly
+
+```bash
+cd contracts
+
+forge script script/DeployLPHelper.s.sol:DeployLPHelper \
+  --rpc-url $SEPOLIA_RPC_URL \
+  --broadcast --verify \
+  -vvvv
+```
+
+#### Required environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `PRIVATE_KEY` | Deployer wallet private key |
+| `ARBITRUM_RPC_URL` | Arbitrum One RPC endpoint |
+| `ETHEREUM_RPC_URL` | Ethereum mainnet RPC endpoint |
+| `SEPOLIA_RPC_URL` | Sepolia testnet RPC endpoint |
+| `ETHERSCAN_API_KEY` | For contract verification (optional) |
+
+After deploying, update the corresponding `deployments/<chain>.json` file with the deployed `lp-helper` address.
 
 ## How It Works
 
@@ -119,8 +166,9 @@ export VEXITY_PLUGIN_DIRS=/path/to/plugins
 
 | Chain | LP Helper | Status |
 |-------|-----------|--------|
-| Arbitrum | `0x000...000` | Placeholder — deploy needed |
-| Sepolia | `0x000...000` | Placeholder — deploy needed |
+| Arbitrum | `0x000...000` | Placeholder — deploy via `./script/deploy.sh arbitrum --broadcast` |
+| Ethereum | `0x000...000` | Placeholder — deploy via `./script/deploy.sh ethereum --broadcast` |
+| Sepolia | `0x000...000` | Placeholder — deploy via `./script/deploy.sh sepolia --broadcast` |
 
 Uniswap V3 core contracts (Factory, PositionManager, SwapRouter) are included in deployments for reference.
 
