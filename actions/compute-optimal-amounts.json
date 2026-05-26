@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:compute-optimal-amounts",
   "abiRef": "lp-helper",
   "functionName": "computeOptimalAmounts",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Compute Optimal LP Token Amounts",
   "description": "Calculate the maximum-liquidity token amounts for a given tick range given available token balances",
   "detail": "Given a pool's current sqrtPriceX96 and available token balances, computes the exact token0 and token1 amounts that maximize liquidity for the specified tick range. Returns values that satisfy the Uniswap V3 LiquidityAmounts invariant — amount0Desired and amount1Desired are ready to pass directly to the NonfungiblePositionManager mint or increaseLiquidity functions. Any remaining tokens after minting can be swapped to rebalance the ratio.",

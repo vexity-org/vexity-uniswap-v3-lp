@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:decrease-liquidity",
   "abiRef": "position-manager",
   "functionName": "decreaseLiquidity",
-  "builderType": "standard",
+  "builderType": "custom",
   "name": "Decrease LP Liquidity",
   "description": "Remove liquidity from a Uniswap V3 LP position",
   "detail": "Removes the specified amount of liquidity from an existing position. Set liquidity to MAX to remove all liquidity. Important: this does NOT transfer tokens — you must call collect-fees afterward to actually receive the freed tokens. The position NFT remains and can be reused.",

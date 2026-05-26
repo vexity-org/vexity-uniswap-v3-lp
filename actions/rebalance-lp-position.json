@@ -2,7 +2,7 @@
   "id": "uniswap-v3-lp:rebalance-lp-position",
   "abiRef": "lp-helper",
   "functionName": "computeOptimalAmounts",
-  "builderType": "weiroll",
+  "builderType": "custom",
   "name": "Rebalance LP Position",
   "description": "Fully rebalance an out-of-range Uniswap V3 LP position by closing the old position, collecting fees, swapping to the correct ratio, and minting a new position at the current price",
   "detail": "Orchestrates a complete Uniswap V3 LP rebalance as a Weiroll script. The flow is: (1) remove all liquidity from the existing position, (2) collect freed tokens and fees, (3) compute the optimal new tick range centered on the current price, (4) calculate the optimal token amounts for that range, (5) swap the surplus token to match the required ratio, (6) mint a new position with the balanced amounts. Step outputs are chained via $step.N.output references — the minted tokenId, collected amounts, computed ticks, and swap output all flow automatically between steps.",
