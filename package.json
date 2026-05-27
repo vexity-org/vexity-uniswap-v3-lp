@@ -1,0 +1,32 @@
+{
+  "name": "vexity-uniswap-v3-lp",
+  "version": "1.1.0",
+  "description": "Uniswap V3 LP position management plugin for Vexity — custom compiler for rebalance strategy",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^22.0.0"
+  },
+  "files": [
+    "dist/",
+    "abis/",
+    "actions/",
+    "deployments/",
+    "strategies/",
+    "protocol.json",
+    "SKILL.md"
+  ]
+}
