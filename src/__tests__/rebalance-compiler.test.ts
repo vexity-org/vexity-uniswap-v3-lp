@@ -13,18 +13,18 @@ import { compileRebalance, type CompileScriptFn, type ResolveTokenFn, type Opera
 // Test fixtures
 // ---------------------------------------------------------------------------
 
-const WETH_ADDRESS = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1" as Address;
-const USDC_ADDRESS = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" as Address;
-const POOL_ADDRESS = "0xC6962004f452bE9203591991D15f6b388e09E8D0" as Address;
-const OWNER = "0x1234567890123456789012345678901234567890" as Address;
+const WETH_ADDRESS = getAddress("0x82aF49447D8a07e3bd95BD0d56f35241523fBab1");
+const USDC_ADDRESS = getAddress("0xaf88d065e77c8cC2239327C5EDb3A432268e5831");
+const POOL_ADDRESS = getAddress("0xC6962004f452bE9203591991D15f6b388e09E8D0");
+const OWNER = getAddress("0x1234567890123456789012345678901234567890");
 const CHAIN_ID = 42161; // Arbitrum
 const RPC_URL = "https://arb-mainnet.g.alchemy.com/v2/test-key";
 
 // Position manager address (well-known)
-const POSITION_MANAGER = "0xC36442b4a4522E871399CD717aBDD847Ab5B0983" as Address;
+const POSITION_MANAGER = getAddress("0xC36442b4a4522E871399CD717aBDD847Ab5B0983");
 
 // LP Helper on Arbitrum
-const LP_HELPER = "0x8b320a9bb7e900cc2af9fd251482d137d402b6b6" as Address;
+const LP_HELPER = getAddress("0x8b320a9bb7e900cc2af9fd251482d137d402b6b6");
 
 // Mock token info
 const WETH_INFO = { address: WETH_ADDRESS, decimals: 18, symbol: "WETH" };

@@ -130,14 +130,14 @@ const CHAIN_MAP: Record<number, any> = {
 
 /** Well-known Uniswap V3 addresses (same on all canonical chains via CREATE2) */
 const UNISWAP_V3_ADDRESSES = {
-  factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984" as Address,
-  positionManager: "0xC36442b4a4522E871399CD717aBDD847Ab5B0983" as Address,
-  router: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45" as Address,
+  factory: getAddress("0x1F98431c8aD98523631AE4a59f267346ea31F984"),
+  positionManager: getAddress("0xC36442b4a4522E871399CD717aBDD847Ab5B0983"),
+  router: getAddress("0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"),
 };
 
 /** LP Helper deployment addresses per chain */
 const LP_HELPER_ADDRESSES: Record<number, Address> = {
-  42161: "0x8b320a9bb7e900cc2af9fd251482d137d402b6b6",
+  42161: getAddress("0x8b320a9bb7e900cc2af9fd251482d137d402b6b6"),
 };
 
 const VALID_FEE_TIERS = [100, 500, 3000, 10000] as const;
@@ -339,7 +339,7 @@ async function findExistingPosition(
     const posToken0 = getAddress(pos[2]);
     const posToken1 = getAddress(pos[3]);
     const posFee = Number(pos[4]);
-    const posLiquidity = pos[7] as bigint;
+    const posLiquidity = BigInt(pos[7]);
 
     if (
       posToken0.toLowerCase() === token0.toLowerCase() &&
@@ -355,8 +355,8 @@ async function findExistingPosition(
         tickLower: Number(pos[5]),
         tickUpper: Number(pos[6]),
         liquidity: posLiquidity,
-        tokensOwed0: pos[10] as bigint,
-        tokensOwed1: pos[11] as bigint,
+        tokensOwed0: BigInt(pos[10]),
+        tokensOwed1: BigInt(pos[11]),
       };
     }
   }
